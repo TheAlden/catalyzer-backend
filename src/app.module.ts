@@ -8,9 +8,16 @@ import { CatsModule } from './cats/cats.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
+import { ConfigModule } from '@nestjs/config';
+
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://alden:sTyx9Vu5nUA6T5BH@cluster0.la0oq9r.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    // Make sure you have a file called ".env" 
+    // with MONGODB_URI='mongodb+srv://<username>:<password>@cluster.mongodb.net/mydb'
+    MongooseModule.forRoot(process.env.MONGODB_URI),
     CatsModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
