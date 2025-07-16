@@ -7,6 +7,8 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './mail/mail.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -20,9 +22,10 @@ import { MailModule } from './mail/mail.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-      playground: true
+      playground: true,
+      context: ({ req }) => ({ req }),
     }), 
-    MailModule,],
+    MailModule, AuthModule, UsersModule,],
   controllers: [AppController],
   providers: [AppService],
 })
