@@ -1,10 +1,10 @@
-// Used for GraphQL
-
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { CatsService } from './cats.service';
 import { Cat } from './cats.model';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { UpdateCatDto } from './dto/update-cat.dto';
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { User } from 'src/users/schemas/user.schema';
 
 @Resolver(() => Cat)
 export class CatsResolver {
@@ -21,8 +21,11 @@ export class CatsResolver {
     }
 
     @Mutation(() => Cat)
-    async createCat(@Args('createCatDto') input: CreateCatDto) {
-        return this.catsService.create(input);
+    async createCat(
+    @Args('createCatDto') input: CreateCatDto, @CurrentUser() user: { userId: string },) {
+        console.log(user)
+        const userId = user.userId;
+        return this.catsService.create(input, userId);
     }
 
     @Mutation(() => Cat, { nullable: true })

@@ -1,18 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cat, CatDocument } from './schemas/cat.schema';
+import { User } from '../users/schemas/user.schema';
 import { Model } from 'mongoose';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { UpdateCatDto } from './dto/update-cat.dto';
 
 @Injectable()
 export class CatsService {
-  constructor(@InjectModel(Cat.name) private catModel: Model<CatDocument>) {}
+  constructor(
+  @InjectModel(Cat.name) private readonly catModel: Model<Cat>,
+  @InjectModel(User.name) private readonly userModel: Model<User>,
+) {}
 
-  async create(createCatDto: CreateCatDto): Promise<Cat> {
+  async create(createCatDto: CreateCatDto, userId: string): Promise<Cat> {
     try {
-      const createdCat = new this.catModel(createCatDto);
-      return await createdCat.save();
+      if (!userId) {throw new Error('userId is required');}
+      
+      const createdCat = new this.catModel({
+        ...createCatDto,
+        userId,
+      });
+
+      const savedCat = await createdCat.save();
+
+      // Update the user to add the cat ID
+      await this.userModel.findByIdAndUpdate(userId, {
+        $push: { cats: savedCat._id },
+      });
+
+      return savedCat;
     } catch (error) {
       console.error('Failed to save cat:', error);
       throw error;

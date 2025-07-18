@@ -13,4 +13,7 @@ export class Cat {
 
   @Field()
   color: string;
+
+  @Field(() => ID)
+  userId: string;
 }

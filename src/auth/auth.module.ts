@@ -24,7 +24,7 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   providers: [
     AuthService, 
-     //{provide: APP_GUARD, useClass: JwtAuthGuard},
+     {provide: APP_GUARD, useClass: JwtAuthGuard},
     LocalStrategy,
     JwtStrategy
   ],
