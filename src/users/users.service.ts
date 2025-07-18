@@ -18,9 +18,9 @@ export class UsersService {
 
   async create(input: CreateUserInput): Promise<User> {
    const existing = await this.userModel.findOne({ username: input.username });
-  if (existing) {
-    throw new Error('Username is already taken.');
-  }
+    if (existing) {
+      throw new Error('Username is already taken.');
+    }
     const newUser = new this.userModel({ username: input.username, password: input.password });
     return newUser.save();
   }

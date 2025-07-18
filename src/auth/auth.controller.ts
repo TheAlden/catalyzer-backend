@@ -1,3 +1,4 @@
+/* NO LONGER USED
 import {
   Body,
   Controller,
@@ -11,7 +12,7 @@ import {
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signin.dto';
-import { Public } from './pubic.decorator';
+import { Public } from './public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -21,7 +22,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+    //return this.authService.signIn(signInDto.username, signInDto.password);
   }
 
   @UseGuards(AuthGuard)
@@ -30,3 +31,4 @@ export class AuthController {
     return req.user;
   }
 }
+  */
