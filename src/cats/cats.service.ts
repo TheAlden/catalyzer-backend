@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Cat, CatDocument } from './schemas/cat.schema';
+import { Cat } from './schemas/cat.schema';
 import { User } from '../users/schemas/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { UpdateCatDto } from './dto/update-cat.dto';
+
 
 @Injectable()
 export class CatsService {
@@ -36,19 +37,54 @@ export class CatsService {
     }
   }
 
+  async findAllByUser(userId: string): Promise<Cat[]> {
+    return this.catModel.find({ userId }).exec();
+  }
+
   async findAll(): Promise<Cat[]> {
     return this.catModel.find().exec();
   }
 
   async findOne(id: string): Promise<Cat | null> {
-  return this.catModel.findById(id).exec();
-}
-
-  async delete(id: string): Promise<any> {
-    return this.catModel.findByIdAndDelete(id);
+    return this.catModel.findById(id).exec();
   }
 
-  async update(id: string, updateData: UpdateCatDto): Promise<Cat> {
-    return this.catModel.findByIdAndUpdate(id, updateData, { new: true });
+  async delete(id: string, userId: string): Promise<any> {
+    const isOwner = await this.verifyOwnership(id, userId);
+
+    if (!isOwner) return false;
+
+    // Remove the cat document
+    const deletedCat = await this.catModel.findByIdAndDelete(id);
+
+    // Remove the ObjectId from the user's cats array
+    await this.userModel.findByIdAndUpdate(userId, {
+      $pull: { cats: new Types.ObjectId(id) }
+    });
+
+  return deletedCat;
+  }
+
+  async update(id: string, updateData: UpdateCatDto, userId: string): Promise<Cat> {
+    const isOwner = await this.verifyOwnership(id, userId);
+
+    if (isOwner) {
+      return this.catModel.findByIdAndUpdate(id, updateData, { new: true });
+    }
+  }
+
+  // Helper function to detect ownership of cat:
+  async verifyOwnership(catId: string, userId: string): Promise<boolean> {
+    const cat = await this.catModel.findById(catId);
+
+    if (!cat || !cat.userId) {
+      throw new Error('Cat not found');
+    }
+
+    if (cat.userId.toString() !== userId) {
+      throw new Error('You do not have permission to modify this cat');
+    }
+
+    return true;
   }
 }

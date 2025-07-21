@@ -15,6 +15,12 @@ export class CatsResolver {
         return this.catsService.findAll();
     }
 
+    @Query(() => [Cat])
+    async usersCats(@CurrentUser() user: { userId: string }) {
+        const userId = user.userId;
+        return this.catsService.findAllByUser(userId);
+    }
+
     @Query(() => Cat)
     async cat(@Args('id') id: string) {
         return this.catsService.findOne(id);
@@ -23,21 +29,17 @@ export class CatsResolver {
     @Mutation(() => Cat)
     async createCat(
     @Args('createCatDto') input: CreateCatDto, @CurrentUser() user: { userId: string },) {
-        console.log(user)
         const userId = user.userId;
         return this.catsService.create(input, userId);
     }
 
     @Mutation(() => Cat, { nullable: true })
-    deleteCat(@Args('id') id: string) {
-        return this.catsService.delete(id);
+    deleteCat(@Args('id') id: string, @CurrentUser() user: { userId: string }) {
+        return this.catsService.delete(id, user.userId);
     }
 
     @Mutation(() => Cat, { nullable: true })
-    updateCat(
-    @Args('id') id: string,
-    @Args('updateCatDto') input: UpdateCatDto
-    ) {
-        return this.catsService.update(id, input);
+    updateCat(@Args('id') id: string, @Args('updateCatDto') input: UpdateCatDto, @CurrentUser() user: { userId: string }) {
+        return this.catsService.update(id, input, user.userId);
     }
 }
